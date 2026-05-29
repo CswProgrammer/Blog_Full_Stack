@@ -13,6 +13,12 @@ if [ ! -f .env ]; then
   sed -i "s/change_me_to_a_long_random_string/$(openssl rand -hex 32)/" .env
 fi
 
+# Docker internal network uses service ports, not host-mapped ports.
+sed -i 's/^MYSQL_PORT=.*/MYSQL_PORT=3306/' .env
+sed -i 's/^REDIS_PORT=.*/REDIS_PORT=6379/' .env
+sed -i 's/^MYSQL_HOST=.*/MYSQL_HOST=mysql/' .env
+sed -i 's/^REDIS_HOST=.*/REDIS_HOST=redis/' .env
+
 docker compose build --pull
 docker compose up -d
 docker compose ps
