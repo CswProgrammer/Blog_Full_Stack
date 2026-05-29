@@ -14,7 +14,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy via SSH
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Upload project to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          port: ${{ secrets.SERVER_PORT }}
+          source: "."
+          target: "/opt/blog"
+          overwrite: true
+
+      - name: Build and start containers
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -24,23 +38,19 @@ jobs:
           command_timeout: 30m
           script: |
             set -euo pipefail
-            APP_DIR="/opt/blog"
-            REPO="https://github.com/CswProgrammer/Blog_Full_Stack.git"
 
             if ! command -v docker >/dev/null 2>&1; then
-              curl -fsSL https://get.docker.com | sh
+              if command -v dnf >/dev/null 2>&1; then
+                dnf install -y moby docker-compose-plugin
+              elif command -v yum >/dev/null 2>&1; then
+                yum install -y moby docker-compose-plugin
+              else
+                curl -fsSL https://get.docker.com | sh
+              fi
               systemctl enable docker
               systemctl start docker
             fi
 
-            if [ ! -d "$APP_DIR/.git" ]; then
-              rm -rf "$APP_DIR"
-              git clone "$REPO" "$APP_DIR"
-            fi
-
-            cd "$APP_DIR"
-            git fetch origin main
-            git reset --hard origin/main
-
+            cd /opt/blog
             chmod +x deploy/deploy.sh
-            APP_DIR="$APP_DIR" bash deploy/deploy.sh
+            APP_DIR=/opt/blog bash deploy/deploy.sh
