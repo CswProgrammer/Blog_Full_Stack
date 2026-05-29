@@ -51,6 +51,13 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
+## 生产部署
+
+推送 `main` 分支会自动触发 GitHub Actions 部署到服务器。
+
+- 线上地址：http://82.156.149.118/zh
+- 部署目录：`/opt/blog`
+
 ## 目录
 
 ```text
