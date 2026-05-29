@@ -1,0 +1,16 @@
+services:
+  mysql:
+    ports: []
+
+  redis:
+    ports: []
+
+  api:
+    ports: []
+
+  web:
+    ports:
+      - "3000:3000"
+    build:
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://${SERVER_HOST:-localhost}:3000
