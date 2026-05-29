@@ -24,4 +24,10 @@ docker compose up -d
 docker compose ps
 docker image prune -f
 
-echo "Deploy finished. Web: http://${SERVER_HOST:-localhost}:3000"
+NGINX_VHOST="/www/server/panel/vhost/nginx/${SERVER_HOST}.conf"
+if [ -f deploy/nginx/blog.conf ] && [ -d /www/server/panel/vhost/nginx ]; then
+  cp deploy/nginx/blog.conf "$NGINX_VHOST"
+  nginx -t && nginx -s reload
+fi
+
+echo "Deploy finished. Web: http://${SERVER_HOST}/zh"
